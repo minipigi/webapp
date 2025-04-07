@@ -128,7 +128,7 @@ for idx, channel in enumerate(channels):
     progress.progress((idx + 1) / len(channels))
 
 # 시각화
-st.subheader("📸 위성 이미지 시각화")
+st.subheader("📸 위성 이미지 시각화 테스트 입니다")
 
 num_images = len(file_names)
 num_cols = math.ceil(num_images / 2)
