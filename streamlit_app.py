@@ -1077,13 +1077,13 @@ def main():
             }
 
         response = requests.get(url, params=api_parameters)
-        data = response.json()
+        data_meteoblue = response.json()
 
         # 데이터 확인 및 값 추출
-        time_list = data["data_xmin"]["time"]
+        time_list = data_meteoblue["data_xmin"]["time"]
         idx = time_list.index(now_str) if now_str in time_list else -1
-        cloud_amount = int(data["data_xmin"]["totalcloudcover"][idx])
-        visibility = int(data["data_xmin"]["visibility"][idx])
+        cloud_amount = int(data_meteoblue["data_xmin"]["totalcloudcover"][idx])
+        visibility = int(data_meteoblue["data_xmin"]["visibility"][idx])
 
         data['SEE'] = visibility
         data['CLD'] = cloud_amount
