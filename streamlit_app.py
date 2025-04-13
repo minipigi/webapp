@@ -778,7 +778,7 @@ def main():
             # 이미지 로드 및 출력
             if os.path.exists(moon_image_path):
                 image = Image.open(moon_image_path)
-                st.image(image, use_column_width=True)
+                st.image(image, use_container_width=True)
             else:
                 st.warning(f"이미지 {moon_image_path} 를 찾을 수 없습니다.")
 
@@ -1000,7 +1000,7 @@ def main():
 
             image_path = os.path.join(save_dir, image_files[st.session_state.frame_idx])
             image = Image.open(image_path)
-            st.image(image, caption=f"Frame {st.session_state.frame_idx + 1}/{total_frames}", use_column_width=True)
+            st.image(image, caption=f"Frame {st.session_state.frame_idx + 1}/{total_frames}", use_container_width=True)
 
     # 탭 5: 천체 관측 가능지수
     with tab5:
