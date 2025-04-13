@@ -137,11 +137,12 @@ def get_air_quality(station_name):
 
 def get_base_time(service):
     """서비스 유형에 따른 기상 정보 기준 시간 계산"""
-    now = datetime.now()
-    hour = now.hour
-    minute = now.minute
+    now = datetime.now(timezone.utc) + timedelta(hours=9)  # UTC를 KST로 변환
+    hour = now.hour  # KST 기준의 시간
+    minute = now.minute  # KST 기준의 분
 
     if service == '초단기실황':
+        # 정시 데이터는 정시에서 10분 이후에 제공 가능
         if minute < 10:
             hour -= 1
             if hour < 0:
