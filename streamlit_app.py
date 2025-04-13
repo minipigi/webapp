@@ -1035,7 +1035,7 @@ def main():
         }
 
         # 시각화할 항목 선택 (표시 순서)
-        visual_keys = ['T1H', 'REH', 'WSD', 'SKY', 'PTY', 'RN1']
+        visual_keys = ['T1H', 'REH', 'WSD', 'SKY', 'PTY', 'RN1', 'SEE', 'CLD']
 
         # 라벨 (이모지 포함)
         labels = {
