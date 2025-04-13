@@ -629,7 +629,7 @@ def calculate_observation_quality(PTY, SQM, cloud_amount, humidity, moonphase, v
         return {"결과": "관측불가"}
 
     # --- 가중치 계산 ---
-    W_sqm = max(0, min((SQM - 18) / 4, 1))  # 18~22 기준으로 정규화
+    W_sqm = max(0, min((SQM - 18) / 3, 1))  # 18~21 기준으로 정규화
     W_cloud = (1 - cloud_amount / 100) ** 1.5
     W_humidity = 1 - 0.3 * (humidity / 100)
     W_moon = 1 - 0.7 * (moonphase / 100)
