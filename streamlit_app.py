@@ -363,9 +363,12 @@ def download_images(base_url, max_frames, save_dir):
         tuple: 성공적으로 다운로드된 파일 수와 실패한 파일 수.
     """
     progress_placeholder = st.empty()
+    progress_text = st.empty()
     progress_bar = progress_placeholder.progress(0)
     success_count = 0
     fail_count = 0
+
+    progress_text.text("이미지 다운로드 중...")
 
     for i in range(max_frames):
         url = base_url.format(i)
@@ -384,8 +387,27 @@ def download_images(base_url, max_frames, save_dir):
         # 프로그레스 바 업데이트
         progress_bar.progress((i + 1) / max_frames)
 
+    progress_text.text("이미지 다운로드 완료!")
+
     # 다운로드 결과 반환
     return success_count, fail_count
+
+
+# GIF 생성 함수
+def create_gif(image_dir, gif_name):
+    image_files = sorted([f for f in os.listdir(image_dir) if f.endswith(".png")])
+    if image_files:
+    gif_path = os.path.join(image_dir, gif_name)
+    images = [Image.open(os.path.join(image_dir, f)) for f in image_files]
+    images[0].save(
+        gif_path,
+        save_all=True,
+        append_images=images[1:],
+        duration=500,  # 각 프레임 지속 시간 (밀리초)
+        loop=0  # 무한 반복
+    )
+    return gif_path
+    return None
 
 
 # ===== 달 고도 계산 함수 =====
@@ -1006,50 +1028,40 @@ def main():
 
         st.divider()
 
-        save_dir = "weather_images"
-        os.makedirs(save_dir, exist_ok=True)
+        ch_save_dir = "ch_weather_images"
+        cml_save_dir = "cml_weather_images"
+        os.makedirs(ch_save_dir, exist_ok=True)
+        os.makedirs(cml_save_dir, exist_ok=True)
 
         # 기본 URL과 프레임 수를 변수로 저장
-        base_url = "https://tingala.net/gpv-map/map/msm/ch/ft{:02d}.png"
-        max_frames = 79  # 다운로드할 프레임 수
+        ch_url = "https://tingala.net/gpv-map/map/msm/ch/ft{:02d}.png"
+        cml_url = "https://tingala.net/gpv-map/map/msm/cml/ft{:02d}.png"
+        max_frames = 51  # 다운로드할 프레임 수
         
-        st.subheader("🌧️ 상층 구름 예보(일/시간)")
+        # 이미지 다운로드
+        download_images(ch_url, max_frames, ch_save_dir)
+        download_images(cml_url, max_frames, cml_save_dir)
 
-        # 다운로드 시작
-        if base_url and max_frames > 0:
-            success_count, fail_count = download_images(base_url, max_frames, save_dir)
+        # GIF 생성
+        ch_gif_path = create_gif(ch_save_dir, "ch_weather_animation.gif")
+        cml_gif_path = create_gif(cml_save_dir, "cml_weather_animation.gif")
 
-        # 이미지 폴더 확인
-        if os.path.exists(save_dir):
-            image_files = sorted([f for f in os.listdir(save_dir) if f.endswith(".png")])
-            
-            if image_files:
-                # 전체 프레임 수
-                total_frames = len(image_files)
-                
-                # 파일 정보 표시
-                st.caption(f"총 {total_frames}개 이미지가 재생됩니다.")
-                
-                # 이미지 표시 컨테이너
-                image_container = st.empty()
-                
-                # 이미지 표시 함수
-                def show_image(idx):
-                    image_path = os.path.join(save_dir, image_files[idx])
-                    image = Image.open(image_path)
-                    image_container.image(image, caption=f"Frame {idx + 1}/{total_frames}", use_container_width=True)
-                
-                # 자동 재생
-                for i in range(total_frames):
-                    show_image(i)
-                    time.sleep(0.5)  # 재생 속도 고정 (0.5초)
-                
-                # 재생이 끝나면 재실행
-                st.rerun()
+        # GIF 표시
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("상층 구름 예보(일/시간)")
+            if ch_gif_path:
+            st.image(ch_gif_path, caption="상층 구름 예보 애니메이션", use_container_width=True)
             else:
-                st.warning(f"{save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
-        else:
-            st.error(f"{save_dir} 폴더가 존재하지 않습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
+            st.warning(f"{ch_save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
+
+        with col2:
+            st.subheader("중상층 구름 예보(일/시간)")
+            if cml_gif_path:
+            st.image(cml_gif_path, caption="중하층 구름 예보 애니메이션", use_container_width=True)
+            else:
+            st.warning(f"{cml_save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
 
     # 탭 5: 천체 관측 가능지수
     with tab5:
