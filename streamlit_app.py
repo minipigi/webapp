@@ -631,7 +631,7 @@ def calculate_observation_quality(PTY, SQM, cloud_amount, humidity, moonphase, v
     # --- 가중치 계산 ---
     W_sqm = max(0, min((SQM - 18) / 4, 1))  # 18~22 기준으로 정규화
     W_cloud = (1 - cloud_amount / 100) ** 1.5
-    W_humidity = 1 - 0.5 * (humidity / 100)
+    W_humidity = 1 - 0.3 * (humidity / 100)
     W_moon = 1 - 0.7 * (moonphase / 100)
     W_visibility = min(visibility / 20000, 1.0)
 
@@ -675,8 +675,8 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
     if result.get("결과") == "관측불가":
         st.error("관측불가: 강수가 감지되었습니다.")
     else:
-        st.success(f"관측 지수(COI): {result['COI']}")
-        st.write("가중치 정보:")
+        st.success(f"천체관측 가능 지수(COI): {result['COI']}")
+        st.write("가중치 정보")
         for key, value in result["가중치"].items():
             st.write(f"- {key}: {value}")
 
@@ -1096,13 +1096,29 @@ def main():
         cloud_amount = int(data["data_xmin"]["totalcloudcover"][idx])
         visibility = int(data["data_xmin"]["visibility"][idx])
 
+        # 관측 지수 계산 및 출력
+        display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibility)
+
+        st.divider()
+
         # 출력
         st.write(f"🔎 사용된 시각: {time_list[idx]}")
         st.write(f"☁️ Cloud Cover: {cloud_amount} %")
         st.write(f"🌫️ Visibility: {visibility} m")
 
-        # 관측 지수 계산 및 출력
-        display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibility)
+        st.divider()
 
+        # 설명 텍스트
+        explanation = (
+            "다섯 번째 탭에서는 천체 관측 가능지수(COI)를 계산합니다. "
+            "COI는 광공해, 구름량, 습도, 달 위상, 대기 시정과 같은 요소를 기반으로 계산되며, "
+            "각 요소는 가중치로 변환됩니다. 가중치는 정규화된 수식으로 계산되며, "
+            "최종적으로 모든 가중치를 곱하여 전체 가중치(W_total)를 구합니다. "
+            "COI는 이 값을 기반으로 1에서 9 사이의 값으로 계산되며, 값이 낮을수록 관측 가능성이 높음을 의미합니다. "
+            "강수가 감지되면 관측 불가로 표시됩니다."
+        )
+
+        # 텍스트 출력
+        st.text(explanation)
 if __name__ == "__main__":
     main()
