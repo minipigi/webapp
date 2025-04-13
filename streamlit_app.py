@@ -1044,7 +1044,9 @@ def main():
             'REH': '💧 습도 (%)',
             'PTY': '🌂 강수형태',
             'SKY': '🌤️ 하늘 상태',
-            'WSD': '🌬️ 풍속 (m/s)'
+            'WSD': '🌬️ 풍속 (m/s)',
+            'SEE': '🌫️ 가시거리 (m)',
+            'CLD': '☁️ 구름량 (%)'
         }
 
         # 실황 데이터 가져오기
@@ -1053,18 +1055,51 @@ def main():
         # SKY 추가 (초단기예보)
         data['SKY'] = sky_desc
 
+        # 현재 한국 시각 구하기
+        kst = pytz.timezone("Asia/Seoul")
+        now_kst = datetime.now(kst)
+
+        # 현재 시간을 15분 단위로 내림 처리
+        rounded_time = now_kst.replace(
+            minute=(now_kst.minute // 15) * 15, second=0, microsecond=0
+        )
+        now_str = rounded_time.strftime("%Y-%m-%d %H:%M")
+
+        # API 호출
+        url = "https://my.meteoblue.com/packages/clouds-15min"
+        
+        api_parameters = {
+            'apikey': 'wOV0tPijaQGbhC51',
+            'lat': user_lat,
+            'lon': user_lon,
+            'asl': 34,
+            'format': 'json'
+            }
+
+        response = requests.get(url, params=api_parameters)
+        data = response.json()
+
+        # 데이터 확인 및 값 추출
+        time_list = data["data_xmin"]["time"]
+        idx = time_list.index(now_str) if now_str in time_list else -1
+        cloud_amount = int(data["data_xmin"]["totalcloudcover"][idx])
+        visibility = int(data["data_xmin"]["visibility"][idx])
+
+        data['SEE'] = visibility
+        data['CLD'] = cloud_amount
+
         # PTY 설명 치환
         if 'PTY' in data:
             data['PTY'] = pty_mapping.get(str(int(float(data['PTY']))), '정보 없음')
 
         # 두 줄로 나눠서 시각화
-        cols1 = st.columns(3)
-        cols2 = st.columns(3)
+        cols1 = st.columns(4)
+        cols2 = st.columns(4)
 
         for idx, key in enumerate(visual_keys):
             value = data.get(key, "N/A")
             label = labels.get(key, key)
-            col = cols1[idx] if idx < 3 else cols2[idx - 3]
+            col = cols1[idx] if idx < 4 else cols2[idx - 4]
             col.metric(label=label, value=value)
 
         st.divider()
@@ -1106,49 +1141,8 @@ def main():
 
     # 탭 5: 천체 관측 가능지수
     with tab5:
-        # 현재 한국 시각 구하기
-        kst = pytz.timezone("Asia/Seoul")
-        now_kst = datetime.now(kst)
-
-        # 현재 시간을 15분 단위로 내림 처리
-        rounded_time = now_kst.replace(
-            minute=(now_kst.minute // 15) * 15, second=0, microsecond=0
-        )
-        now_str = rounded_time.strftime("%Y-%m-%d %H:%M")
-
-        # API 호출
-        url = "https://my.meteoblue.com/packages/clouds-15min"
-        
-        api_parameters = {
-            'apikey': 'wOV0tPijaQGbhC51',
-            'lat': user_lat,
-            'lon': user_lon,
-            'asl': 34,
-            'format': 'json'
-            }
-
-        response = requests.get(url, params=api_parameters)
-        data = response.json()
-
-        # 데이터 확인 및 값 추출
-        time_list = data["data_xmin"]["time"]
-        idx = time_list.index(now_str) if now_str in time_list else -1
-        cloud_amount = int(data["data_xmin"]["totalcloudcover"][idx])
-        visibility = int(data["data_xmin"]["visibility"][idx])
-
         # 관측 지수 계산 및 출력
         display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibility)
-
-        st.divider()
-
-        # 출력
-        col1, col2 = st.columns(2)
-
-        with col1:
-            col1.metric(label="🌥️ 구름량", value=f"{cloud_amount} %")
-
-        with col2:
-            col2.metric(label="🌫️ 가시거리", value=f"{visibility} m")
 
         st.divider()
 
