@@ -1,3 +1,10 @@
-streamlit
+numpy
+pandas
+pyproj
+Pillow
+opencv-python
 matplotlib
 requests
+skyfield
+streamlit
+pytz
