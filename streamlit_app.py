@@ -1052,16 +1052,16 @@ def main():
         with col1:
             st.subheader("상층 구름 예보(일/시간)")
             if ch_gif_path:
-            st.image(ch_gif_path, caption="상층 구름 예보 애니메이션", use_container_width=True)
+                st.image(ch_gif_path, caption="상층 구름 예보 애니메이션", use_container_width=True)
             else:
-            st.warning(f"{ch_save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
+                st.warning(f"{ch_save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
 
         with col2:
             st.subheader("중상층 구름 예보(일/시간)")
             if cml_gif_path:
-            st.image(cml_gif_path, caption="중하층 구름 예보 애니메이션", use_container_width=True)
+                st.image(cml_gif_path, caption="중하층 구름 예보 애니메이션", use_container_width=True)
             else:
-            st.warning(f"{cml_save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
+                st.warning(f"{cml_save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
 
     # 탭 5: 천체 관측 가능지수
     with tab5:
