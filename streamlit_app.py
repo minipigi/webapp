@@ -19,7 +19,6 @@ from pyproj import Transformer
 
 # 이미지 처리 라이브러리
 from PIL import Image, ImageDraw, ImageFont
-import cv2
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
@@ -34,7 +33,6 @@ from skyfield.api import load, Topos
 # Streamlit 관련 라이브러리
 import streamlit as st
 import pytz
-import json
 
 # ===== 상수 및 설정 =====
 API_KEY = 'ONjL08QnRS2Yy9PEJzUtAQ'
@@ -57,10 +55,13 @@ def setup_korean_font():
 
 def image_to_base64(image_path):
     """이미지를 Base64로 인코딩"""
-    image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-    _, encoded_image = cv2.imencode(".jpg", image)
-    base64_image = base64.b64encode(encoded_image.tobytes()).decode("utf-8")
-    return base64_image
+    try:
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+            return encoded_string
+    except Exception as e:
+        st.error(f"이미지 인코딩 실패: {e}")
+        return None
 
 
 def render_img_html(image_b64):
