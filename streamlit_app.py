@@ -675,7 +675,40 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
     if result.get("결과") == "관측불가":
         st.error("관측불가: 강수가 감지되었습니다.")
     else:
-        st.success(f"천체관측 가능 지수(COI): {result['COI']}")
+        coi = result["COI"]
+        # 색상 매핑 (1~9)
+        coi_colors = {
+            1: "#4CAF50",  # 초록
+            2: "#66BB6A",  # 연한 초록
+            3: "#8BC34A",  # 라임
+            4: "#CDDC39",  # 연한 라임
+            5: "#FFEB3B",  # 노랑
+            6: "#FFC107",  # 주황
+            7: "#FF9800",  # 진한 주황
+            8: "#F44336",  # 빨강
+            9: "#D32F2F"   # 진한 빨강
+        }
+        coi_color = coi_colors.get(int(coi), "#FFFFFF")  # 기본값 흰색
+
+        # COI 결과 출력
+        st.markdown(
+            f"""
+            <div style="
+                background-color: {coi_color};
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                color: white;
+                font-size: 24px;
+                font-weight: bold;
+            ">
+                천체관측 가능 지수 (COI): {coi}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # 가중치 정보 출력
         st.write("가중치 정보")
         for key, value in result["가중치"].items():
             st.write(f"- {key}: {value}")
@@ -939,6 +972,8 @@ def main():
             st.error("근처 측정소를 찾을 수 없습니다.")
 
         st.divider()
+
+        st.subheader("🌤️ 현재 기상 정보")
         
         api_url = 'https://apihub.kma.go.kr/api/typ01/cgi-bin/url/nph-dfs_xy_lonlat'
         api_parameters = {
@@ -1102,9 +1137,25 @@ def main():
         st.divider()
 
         # 출력
-        st.write(f"🔎 사용된 시각: {time_list[idx]}")
-        st.write(f"☁️ Cloud Cover: {cloud_amount} %")
-        st.write(f"🌫️ Visibility: {visibility} m")
+        st.markdown(
+            f"""
+            <div style="background-color: #f0f8ff; padding: 15px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #007acc;">🌥️ 구름량</h3>
+            <p style="font-size: 20px; color: #333;">{cloud_amount} %</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            f"""
+            <div style="background-color: #f0f8ff; padding: 15px; border-radius: 10px; text-align: center;">
+            <h3 style="color: #007acc;">🌫️ 가시거리</h3>
+            <p style="font-size: 20px; color: #333;">{visibility} m</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         st.divider()
 
@@ -1117,6 +1168,67 @@ def main():
             "COI는 이 값을 기반으로 1에서 9 사이의 값으로 계산되며, 값이 낮을수록 관측 가능성이 높음을 의미합니다. "
             "강수가 감지되면 관측 불가로 표시됩니다."
         )
+
+        st.markdown(
+            f"""
+            <div style="background-color: #e6f7ff; padding: 20px; border-left: 5px solid #007acc; border-radius: 5px;">
+            <p style="font-size: 16px; color: #003366;">{explanation}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # COI 설명 표
+        coi_table = """
+        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
+            <thead>
+            <tr style="background-color: #007acc; color: white;">
+                <th style="padding: 10px; border: 1px solid #ddd;">COI 값</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">설명</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr style="background-color: #e6f7ff;">
+                <td style="padding: 10px; border: 1px solid #ddd;">1</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">최적의 관측 조건</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">2</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">매우 좋은 관측 조건</td>
+            </tr>
+            <tr style="background-color: #e6f7ff;">
+                <td style="padding: 10px; border: 1px solid #ddd;">3</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">좋은 관측 조건</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">4</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">관측 가능</td>
+            </tr>
+            <tr style="background-color: #e6f7ff;">
+                <td style="padding: 10px; border: 1px solid #ddd;">5</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">보통</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">6</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">관측 어려움</td>
+            </tr>
+            <tr style="background-color: #e6f7ff;">
+                <td style="padding: 10px; border: 1px solid #ddd;">7</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">관측 매우 어려움</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">8</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">관측 불가능에 가까움</td>
+            </tr>
+            <tr style="background-color: #e6f7ff;">
+                <td style="padding: 10px; border: 1px solid #ddd;">9</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">관측 불가능</td>
+            </tr>
+            </tbody>
+        </table>
+        """
+
+        st.markdown(coi_table, unsafe_allow_html=True)
 
         # 텍스트 출력
         st.text(explanation)
