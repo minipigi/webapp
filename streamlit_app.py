@@ -712,6 +712,13 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
         st.write("가중치 정보")
         for key, value in result["가중치"].items():
             st.write(f"- {key}: {value}")
+            # 가중치 정보를 Columns로 나누어 표시
+            weights = result["가중치"]
+            weight_keys = list(weights.keys())
+            cols = st.columns(len(weight_keys))
+
+            for i, key in enumerate(weight_keys):
+                cols[i].metric(label=key, value=weights[key])
 
 
 # ===== 메인 애플리케이션 =====
@@ -1137,25 +1144,13 @@ def main():
         st.divider()
 
         # 출력
-        st.markdown(
-            f"""
-            <div style="background-color: #f0f8ff; padding: 15px; border-radius: 10px; text-align: center;">
-            <h3 style="color: #007acc;">🌥️ 구름량</h3>
-            <p style="font-size: 20px; color: #333;">{cloud_amount} %</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        col1, col2 = st.columns(2)
 
-        st.markdown(
-            f"""
-            <div style="background-color: #f0f8ff; padding: 15px; border-radius: 10px; text-align: center;">
-            <h3 style="color: #007acc;">🌫️ 가시거리</h3>
-            <p style="font-size: 20px; color: #333;">{visibility} m</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        with col1:
+            col1.metric(label="🌥️ 구름량", value=f"{cloud_amount} %")
+
+        with col2:
+            col2.metric(label="🌫️ 가시거리", value=f"{visibility} m")
 
         st.divider()
 
@@ -1169,60 +1164,54 @@ def main():
             "강수가 감지되면 관측 불가로 표시됩니다."
         )
 
-        st.markdown(
-            f"""
-            <div style="background-color: #e6f7ff; padding: 20px; border-left: 5px solid #007acc; border-radius: 5px;">
-            <p style="font-size: 16px; color: #003366;">{explanation}</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # 텍스트 출력
+        st.text(explanation)
 
         # COI 설명 표
         coi_table = """
         <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
             <thead>
             <tr style="background-color: #007acc; color: white;">
-                <th style="padding: 10px; border: 1px solid #ddd;">COI 값</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">설명</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">COI 값</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">설명</th>
             </tr>
             </thead>
             <tbody>
-            <tr style="background-color: #e6f7ff;">
-                <td style="padding: 10px; border: 1px solid #ddd;">1</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">최적의 관측 조건</td>
+            <tr style="background-color: #4CAF50; color: white;">
+            <td style="padding: 10px; border: 1px solid #ddd;">1</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">최적의 관측 조건</td>
             </tr>
-            <tr>
-                <td style="padding: 10px; border: 1px solid #ddd;">2</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">매우 좋은 관측 조건</td>
+            <tr style="background-color: #66BB6A; color: white;">
+            <td style="padding: 10px; border: 1px solid #ddd;">2</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">매우 좋은 관측 조건</td>
             </tr>
-            <tr style="background-color: #e6f7ff;">
-                <td style="padding: 10px; border: 1px solid #ddd;">3</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">좋은 관측 조건</td>
+            <tr style="background-color: #8BC34A; color: white;">
+            <td style="padding: 10px; border: 1px solid #ddd;">3</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">좋은 관측 조건</td>
             </tr>
-            <tr>
-                <td style="padding: 10px; border: 1px solid #ddd;">4</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">관측 가능</td>
+            <tr style="background-color: #CDDC39; color: black;">
+            <td style="padding: 10px; border: 1px solid #ddd;">4</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">관측 가능</td>
             </tr>
-            <tr style="background-color: #e6f7ff;">
-                <td style="padding: 10px; border: 1px solid #ddd;">5</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">보통</td>
+            <tr style="background-color: #FFEB3B; color: black;">
+            <td style="padding: 10px; border: 1px solid #ddd;">5</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">보통</td>
             </tr>
-            <tr>
-                <td style="padding: 10px; border: 1px solid #ddd;">6</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">관측 어려움</td>
+            <tr style="background-color: #FFC107; color: black;">
+            <td style="padding: 10px; border: 1px solid #ddd;">6</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">관측 어려움</td>
             </tr>
-            <tr style="background-color: #e6f7ff;">
-                <td style="padding: 10px; border: 1px solid #ddd;">7</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">관측 매우 어려움</td>
+            <tr style="background-color: #FF9800; color: white;">
+            <td style="padding: 10px; border: 1px solid #ddd;">7</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">관측 매우 어려움</td>
             </tr>
-            <tr>
-                <td style="padding: 10px; border: 1px solid #ddd;">8</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">관측 불가능에 가까움</td>
+            <tr style="background-color: #F44336; color: white;">
+            <td style="padding: 10px; border: 1px solid #ddd;">8</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">관측 불가능에 가까움</td>
             </tr>
-            <tr style="background-color: #e6f7ff;">
-                <td style="padding: 10px; border: 1px solid #ddd;">9</td>
-                <td style="padding: 10px; border: 1px solid #ddd;">관측 불가능</td>
+            <tr style="background-color: #D32F2F; color: white;">
+            <td style="padding: 10px; border: 1px solid #ddd;">9</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">관측 불가능</td>
             </tr>
             </tbody>
         </table>
@@ -1230,8 +1219,5 @@ def main():
 
         st.markdown(coi_table, unsafe_allow_html=True)
 
-        # 텍스트 출력
-        st.text(explanation)
-        
 if __name__ == "__main__":
     main()
