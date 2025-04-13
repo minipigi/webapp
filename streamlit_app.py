@@ -6,9 +6,9 @@
 
 # 필요한 라이브러리 임포트
 import os
-import math
 import io
 import base64
+import time
 from datetime import datetime, timedelta, timezone
 
 # 데이터 처리 및 변환 관련 라이브러리
@@ -36,7 +36,6 @@ import pytz
 
 # ===== 상수 및 설정 =====
 API_KEY = 'ONjL08QnRS2Yy9PEJzUtAQ'
-
 
 # ===== 유틸리티 함수 =====
 def setup_korean_font():
@@ -350,6 +349,7 @@ def combine_satellite_images(file_names, channel_wavelength):
     # 결합한 이미지 저장
     combined_image.save("combined_with_captions.jpg", quality=100)
 
+
 def download_images(base_url, max_frames, save_dir):
     """
     지정된 URL 패턴과 프레임 수를 사용하여 이미지를 다운로드합니다.
@@ -386,6 +386,7 @@ def download_images(base_url, max_frames, save_dir):
 
     # 다운로드 결과 반환
     return success_count, fail_count
+
 
 # ===== 달 고도 계산 함수 =====
 def calculate_moon_altitude(lat, lon):
@@ -478,6 +479,7 @@ def calculate_moon_altitude(lat, lon):
 
     return fig
 
+
 def calculate_sun_altitude(lat, lon):
     """태양의 고도 계산 및 시각화"""
     # Skyfield 데이터 로드
@@ -568,6 +570,7 @@ def calculate_sun_altitude(lat, lon):
 
     return fig
 
+
 # ===== 기상 정보 파싱 함수 =====
 def parse_weather_xml(xml_text):
     root = ET.fromstring(xml_text)
@@ -588,6 +591,7 @@ def parse_weather_xml(xml_text):
 
     df = pd.DataFrame(data)
     return df
+
 
 # ===== 천체 관측 가능지수 계산 함수 =====
 def calculate_observation_quality(PTY, SQM, cloud_amount, humidity, moonphase, visibility):
@@ -719,7 +723,6 @@ def main():
             st.session_state.sqm = sqm
 
         st.info(f"사용 중인 위치의 값: 위도 {user_lat}, 경도 {user_lon}, SQM {sqm}")
-
 
         # iframe 삽입
         iframe_code = """
@@ -867,7 +870,6 @@ def main():
 
             return "정보 없음", "#CCCCCC"
 
-
         # TM 좌표 -> 측정소 -> 데이터 표시
         tmX, tmY = convert_to_tm(user_lat, user_lon)
         station_name = get_nearest_station(tmX, tmY)
@@ -1011,13 +1013,11 @@ def main():
         base_url = "https://tingala.net/gpv-map/map/msm/ch/ft{:02d}.png"
         max_frames = 79  # 다운로드할 프레임 수
         
-        st.write(f"다운로드 링크: {base_url}")
-        st.write(f"다운로드할 프레임 수: {max_frames}")
-        
+        st.subheader("🌧️ 상층 구름 예보(일/시간)")
+
         # 다운로드 시작
         if base_url and max_frames > 0:
             success_count, fail_count = download_images(base_url, max_frames, save_dir)
-            st.success(f"다운로드 완료: 성공 {success_count}개, 실패 {fail_count}개")
 
         # 이미지 폴더 확인
         if os.path.exists(save_dir):
@@ -1037,7 +1037,7 @@ def main():
                 def show_image(idx):
                     image_path = os.path.join(save_dir, image_files[idx])
                     image = Image.open(image_path)
-                    image_container.image(image, caption=f"Frame {idx + 1}/{total_frames}", use_column_width=True)
+                    image_container.image(image, caption=f"Frame {idx + 1}/{total_frames}", use_container_width=True)
                 
                 # 자동 재생
                 for i in range(total_frames):
