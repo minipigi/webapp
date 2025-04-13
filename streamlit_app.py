@@ -397,16 +397,16 @@ def download_images(base_url, max_frames, save_dir):
 def create_gif(image_dir, gif_name):
     image_files = sorted([f for f in os.listdir(image_dir) if f.endswith(".png")])
     if image_files:
-    gif_path = os.path.join(image_dir, gif_name)
-    images = [Image.open(os.path.join(image_dir, f)) for f in image_files]
-    images[0].save(
-        gif_path,
-        save_all=True,
-        append_images=images[1:],
-        duration=500,  # 각 프레임 지속 시간 (밀리초)
-        loop=0  # 무한 반복
-    )
-    return gif_path
+        gif_path = os.path.join(image_dir, gif_name)
+        images = [Image.open(os.path.join(image_dir, f)) for f in image_files]
+        images[0].save(
+            gif_path,
+            save_all=True,
+            append_images=images[1:],
+            duration=500,  # 각 프레임 지속 시간 (밀리초)
+            loop=0  # 무한 반복
+        )
+        return gif_path
     return None
 
 
