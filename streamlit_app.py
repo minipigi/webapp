@@ -707,18 +707,16 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
             """,
             unsafe_allow_html=True
         )
+        
+        st.divider()
+        
+        # 가중치 정보를 Columns로 나누어 표시
+        weights = result["가중치"]
+        weight_keys = list(weights.keys())
+        cols = st.columns(len(weight_keys))
 
-        # 가중치 정보 출력
-        st.write("가중치 정보")
-        for key, value in result["가중치"].items():
-            st.write(f"- {key}: {value}")
-            # 가중치 정보를 Columns로 나누어 표시
-            weights = result["가중치"]
-            weight_keys = list(weights.keys())
-            cols = st.columns(len(weight_keys))
-
-            for i, key in enumerate(weight_keys):
-                cols[i].metric(label=key, value=weights[key])
+        for i, key in enumerate(weight_keys):
+            cols[i].metric(label=key, value=weights[key])
 
 
 # ===== 메인 애플리케이션 =====
