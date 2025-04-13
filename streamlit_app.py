@@ -350,6 +350,42 @@ def combine_satellite_images(file_names, channel_wavelength):
     # 결합한 이미지 저장
     combined_image.save("combined_with_captions.jpg", quality=100)
 
+def download_images(base_url, max_frames, save_dir):
+    """
+    지정된 URL 패턴과 프레임 수를 사용하여 이미지를 다운로드합니다.
+    
+    Args:
+        base_url (str): 다운로드할 이미지의 URL 패턴.
+        max_frames (int): 다운로드할 이미지의 총 프레임 수.
+        save_dir (str): 이미지를 저장할 디렉토리 경로.
+    
+    Returns:
+        tuple: 성공적으로 다운로드된 파일 수와 실패한 파일 수.
+    """
+    progress_placeholder = st.empty()
+    progress_bar = progress_placeholder.progress(0)
+    success_count = 0
+    fail_count = 0
+
+    for i in range(max_frames):
+        url = base_url.format(i)
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                filename = os.path.join(save_dir, f"ft{i:02d}.png")
+                with open(filename, "wb") as f:
+                    f.write(response.content)
+                success_count += 1
+            else:
+                fail_count += 1
+        except Exception:
+            fail_count += 1
+
+        # 프로그레스 바 업데이트
+        progress_bar.progress((i + 1) / max_frames)
+
+    # 다운로드 결과 반환
+    return success_count, fail_count
 
 # ===== 달 고도 계산 함수 =====
 def calculate_moon_altitude(lat, lon):
@@ -633,13 +669,12 @@ def main():
     setup_korean_font()
 
     # UI 구성: 탭 인터페이스 생성
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📍 사용자 위치 지정", 
         "🛰️ 위성 이미지", 
         "🌙 태양/달 고도 그래프",
         "🌦️ 각종 기상 정보", 
-        "🔭 천체 관측 가능지수(COI)",
-        "🌌 대시보드"
+        "🔭 천체 관측 가능지수(COI)"
     ])
 
     # 탭 1: 사용자 위치 지정
@@ -972,35 +1007,49 @@ def main():
         save_dir = "weather_images"
         os.makedirs(save_dir, exist_ok=True)
 
-        @st.cache_resource
-        def load_image_list():
-            return sorted([f for f in os.listdir(save_dir) if f.endswith(".png")])
+        # 기본 URL과 프레임 수를 변수로 저장
+        base_url = "https://tingala.net/gpv-map/map/msm/ch/ft{:02d}.png"
+        max_frames = 79  # 다운로드할 프레임 수
+        
+        st.write(f"다운로드 링크: {base_url}")
+        st.write(f"다운로드할 프레임 수: {max_frames}")
+        
+        # 다운로드 시작
+        if base_url and max_frames > 0:
+            success_count, fail_count = download_images(base_url, max_frames, save_dir)
+            st.success(f"다운로드 완료: 성공 {success_count}개, 실패 {fail_count}개")
 
-        image_files = load_image_list()
-        total_frames = len(image_files)
-
-        st.header("날씨 이미지 다운로드")
-
-        if total_frames == 0:
-            st.warning(f"{save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
-        else:
-            # 초기 상태 설정
-            if 'frame_idx' not in st.session_state:
-                st.session_state.frame_idx = 0
-
-            def update_frame_idx():
-                st.session_state.frame_idx = st.session_state.slider_value
-
-            st.slider("프레임 선택", 0, total_frames - 1, st.session_state.frame_idx,
-                    key="slider_value", on_change=update_frame_idx)
+        # 이미지 폴더 확인
+        if os.path.exists(save_dir):
+            image_files = sorted([f for f in os.listdir(save_dir) if f.endswith(".png")])
             
-            speed = st.slider("재생 속도 (초)", 0.1, 2.0, 0.5)
-
-            st.caption(f"총 {total_frames}개 이미지 / 현재: {image_files[st.session_state.frame_idx]}")
-
-            image_path = os.path.join(save_dir, image_files[st.session_state.frame_idx])
-            image = Image.open(image_path)
-            st.image(image, caption=f"Frame {st.session_state.frame_idx + 1}/{total_frames}", use_container_width=True)
+            if image_files:
+                # 전체 프레임 수
+                total_frames = len(image_files)
+                
+                # 파일 정보 표시
+                st.caption(f"총 {total_frames}개 이미지가 재생됩니다.")
+                
+                # 이미지 표시 컨테이너
+                image_container = st.empty()
+                
+                # 이미지 표시 함수
+                def show_image(idx):
+                    image_path = os.path.join(save_dir, image_files[idx])
+                    image = Image.open(image_path)
+                    image_container.image(image, caption=f"Frame {idx + 1}/{total_frames}", use_column_width=True)
+                
+                # 자동 재생
+                for i in range(total_frames):
+                    show_image(i)
+                    time.sleep(0.5)  # 재생 속도 고정 (0.5초)
+                
+                # 재생이 끝나면 재실행
+                st.rerun()
+            else:
+                st.warning(f"{save_dir} 폴더에 PNG 이미지가 없습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
+        else:
+            st.error(f"{save_dir} 폴더가 존재하지 않습니다. '이미지 다운로드' 탭에서 먼저 이미지를 다운로드하세요.")
 
     # 탭 5: 천체 관측 가능지수
     with tab5:
@@ -1041,10 +1090,6 @@ def main():
 
         # 관측 지수 계산 및 출력
         display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibility)
-
-    # 탭 6: 대시보드
-    with tab6:
-        st.title("🌌 대시보드")
 
 if __name__ == "__main__":
     main()
