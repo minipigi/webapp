@@ -721,10 +721,10 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
 
 # ===== 실수 변환 함수(예외 처리 포함) =====
 def safe_float(val):
-try:
-    return float(val)
-except (ValueError, TypeError):
-    return None
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return None
 
 
 # ===== 메인 애플리케이션 =====
