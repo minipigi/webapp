@@ -719,6 +719,14 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
             cols[i].metric(label=key, value=weights[key])
 
 
+# ===== 실수 변환 함수(예외 처리 포함) =====
+def safe_float(val):
+try:
+    return float(val)
+except (ValueError, TypeError):
+    return None
+
+
 # ===== 메인 애플리케이션 =====
 def main():
     # Streamlit 페이지 설정
@@ -941,15 +949,26 @@ def main():
             pm10, pm25, o3 = get_air_quality(station_name)
 
             if pm10 and pm25 and o3:
-                # 문자열 -> 숫자 변환
-                pm10_val = float(pm10)
-                pm25_val = float(pm25)
-                o3_val = float(o3)
+                # 값 변환
+                pm10_val = safe_float(pm10)
+                pm25_val = safe_float(pm25)
+                o3_val = safe_float(o3)
 
-                # 등급과 색상 가져오기
-                pm10_level, pm10_color = get_air_quality_level(pm10_val, "PM10")
-                pm25_level, pm25_color = get_air_quality_level(pm25_val, "PM2.5")
-                o3_level, o3_color = get_air_quality_level(o3_val, "O3")
+                # 등급 및 색상 설정
+                if pm10_val is not None:
+                    pm10_level, pm10_color = get_air_quality_level(pm10_val, "PM10")
+                else:
+                    pm10_level, pm10_color = "데이터 없음", "gray"
+
+                if pm25_val is not None:
+                    pm25_level, pm25_color = get_air_quality_level(pm25_val, "PM2.5")
+                else:
+                    pm25_level, pm25_color = "데이터 없음", "gray"
+
+                if o3_val is not None:
+                    o3_level, o3_color = get_air_quality_level(o3_val, "O3")
+                else:
+                    o3_level, o3_color = "데이터 없음", "gray"
 
                 # 컬럼별 표시
                 col1, col2, col3 = st.columns(3)
@@ -957,19 +976,19 @@ def main():
                 with col1:
                     st.markdown(
                         f'<div style="background-color:{pm10_color}; padding: 10px; border-radius: 10px; text-align:center;">'
-                        f'<b>PM10 (미세먼지)</b><br>{pm10_val} µg/m³<br><b>{pm10_level}</b>'
+                        f'<b>PM10 (미세먼지)</b><br>{pm10_val if pm10_val is not None else "-"} µg/m³<br><b>{pm10_level}</b>'
                         '</div>', unsafe_allow_html=True)
 
                 with col2:
                     st.markdown(
                         f'<div style="background-color:{pm25_color}; padding: 10px; border-radius: 10px; text-align:center;">'
-                        f'<b>PM2.5 (초미세먼지)</b><br>{pm25_val} µg/m³<br><b>{pm25_level}</b>'
+                        f'<b>PM2.5 (초미세먼지)</b><br>{pm25_val if pm25_val is not None else "-"} µg/m³<br><b>{pm25_level}</b>'
                         '</div>', unsafe_allow_html=True)
 
                 with col3:
                     st.markdown(
                         f'<div style="background-color:{o3_color}; padding: 10px; border-radius: 10px; text-align:center;">'
-                        f'<b>오존 (O<sub>3</sub>)</b><br>{o3_val:.3f} ppm<br><b>{o3_level}</b>'
+                        f'<b>오존 (O<sub>3</sub>)</b><br>{f"{o3_val:.3f}" if o3_val is not None else "-"} ppm<br><b>{o3_level}</b>'
                         '</div>', unsafe_allow_html=True)
             else:
                 st.error("미세먼지 정보를 불러오지 못했습니다.")
