@@ -643,7 +643,7 @@ def calculate_observation_quality(PTY, SQM, cloud_amount, humidity, moonphase, v
     return {
         "COI": round(COI, 2),
         "가중치": {
-            "W_광공해(Bortle)": round(W_sqm, 3),
+            "W_광공해(SQM)": round(W_sqm, 3),
             "W_구름량": round(W_cloud, 3),
             "W_습도": round(W_humidity, 3),
             "W_달위상": round(W_moon, 3),
@@ -702,7 +702,7 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
                 font-size: 24px;
                 font-weight: bold;
             ">
-                천체관측 가능 지수 (COI): {coi}
+                천체 관측 가능지수 (COI): {coi}
             </div>
             """,
             unsafe_allow_html=True
