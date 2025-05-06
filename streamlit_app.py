@@ -633,7 +633,7 @@ def calculate_observation_quality(PTY, SQM, cloud_amount, humidity, moonphase, v
     W_cloud = (1 - cloud_amount / 100)
     W_humidity = 1 if humidity < 90 else 0.7  # 습도 90% 미만: 1, 80% 이상: 0.7
     W_moon = 1 - 0.7 * (moonphase / 100)
-    W_visibility = min(visibility / 10000, 1.0)
+    W_visibility = min(visibility / 10000, 1)
 
     # --- COI 계산 ---
     W_total = W_sqm * W_cloud * W_humidity * W_moon * W_visibility
@@ -730,7 +730,7 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
                     font-size: 24px;
                     font-weight: bold;
                 ">
-                    태양 관측 가능지수 (COI): {sun_coi}
+                    태양 및 달 관측 가능지수 (COI): {sun_coi}
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -1201,7 +1201,7 @@ def main():
             "최종적으로 모든 가중치를 곱하여 전체 가중치를 구합니다. "
             "COI는 이 값을 기반으로 1에서 9 사이의 값으로 계산되며, 값이 낮을수록 관측 가능성이 높음을 의미합니다. "
             "강수가 감지되면 관측 불가로 표시됩니다."
-            "태양 관측 가능지수는 COI와 유사하게 계산되지만, 구름량, 습도, 가시거리만 고려됩니다. "
+            "태양 및 달 관측 가능지수는 COI와 유사하게 계산되지만, 구름량, 습도, 가시거리만 고려됩니다. "
         )
 
         # 텍스트 출력
