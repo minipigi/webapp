@@ -630,8 +630,8 @@ def calculate_observation_quality(PTY, SQM, cloud_amount, humidity, moonphase, v
 
     # --- 가중치 계산 ---
     W_sqm = max(0, min((SQM - 18) / 3, 1))  # 18~21 기준으로 정규화
-    W_cloud = (1 - cloud_amount / 100) ** 1.25
-    W_humidity = 1 if humidity < 80 else 0.7  # 습도 80% 미만: 1, 80% 이상: 0.7
+    W_cloud = (1 - cloud_amount / 100)
+    W_humidity = 1 if humidity < 90 else 0.7  # 습도 90% 미만: 1, 80% 이상: 0.7
     W_moon = 1 - 0.7 * (moonphase / 100)
     W_visibility = min(visibility / 10000, 1.0)
 
@@ -695,43 +695,46 @@ def display_observation_quality(df_now, sqm, cloud_amount, moon_phase, visibilit
             9: "#D32F2F"   # 진한 빨강
         }
         coi_color = coi_colors.get(int(coi), "#FFFFFF")  # 기본값 흰색
-
-        # COI 결과 출력
-        st.markdown(
-            f"""
-            <div style="
-                background-color: {coi_color};
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-                color: white;
-                font-size: 24px;
-                font-weight: bold;
-            ">
-                천체 관측 가능지수 (COI): {coi}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        
         sun_coi_color = coi_colors.get(int(sun_coi), "#FFFFFF")  # 기본값 흰색
 
-        st.markdown(
-            f"""
-            <div style="
-                background-color: {sun_coi_color};
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-                color: white;
-                font-size: 24px;
-                font-weight: bold;
-            ">
-                태양 관측 가능지수 (COI): {sun_coi}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # 결과를 Columns로 나누어 표시
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(
+                f"""
+                <div style="
+                    background-color: {coi_color};
+                    padding: 20px;
+                    border-radius: 10px;
+                    text-align: center;
+                    color: white;
+                    font-size: 24px;
+                    font-weight: bold;
+                ">
+                    천체 관측 가능지수 (COI): {coi}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        with col2:
+            st.markdown(
+                f"""
+                <div style="
+                    background-color: {sun_coi_color};
+                    padding: 20px;
+                    border-radius: 10px;
+                    text-align: center;
+                    color: white;
+                    font-size: 24px;
+                    font-weight: bold;
+                ">
+                    태양 관측 가능지수 (COI): {sun_coi}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
         
         st.divider()
         
